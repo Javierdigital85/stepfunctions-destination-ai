@@ -25,13 +25,14 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Subscription, SubscriptionProtocol, Topic } from "aws-cdk-lib/aws-sns";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 
-interface DestinationAiProps extends StackProps{
-  readonly destinationEmailNotification?: string
+interface DestinationAiProps extends StackProps {
+  readonly destinationEmailNotification?: string;
 }
 
 export class DestinationAiStack extends Stack {
   //agregue esto para poner las metricas
   public readonly confirmDestinationWorkflowArn: CfnOutput;
+  public readonly destinationAiWorkflowArn: CfnOutput;
 
   constructor(scope: Construct, id: string, props?: DestinationAiProps) {
     super(scope, id, props);
@@ -49,9 +50,9 @@ export class DestinationAiStack extends Stack {
       topicName: "demo-travel-world-new-destination",
     });
 
-    const notificationEmail = props?.destinationEmailNotification
-    if(!notificationEmail){
-      throw new Error("DESTINATION_NOTIFICATION_EMAIL env is required")
+    const notificationEmail = props?.destinationEmailNotification;
+    if (!notificationEmail) {
+      throw new Error("DESTINATION_NOTIFICATION_EMAIL env is required");
     }
 
     new Subscription(this, "NewDestinationTopicSubscription", {
@@ -311,11 +312,15 @@ export class DestinationAiStack extends Stack {
       },
     );
 
-    new CfnOutput(this, "ConfirmDestinationApiUrl", {
-      value: `${api.url}confirm`,
-    });
-
-    //agregue this.confirmDestinationWorkflow para poner las metricas en el cloudwatch
+    //agregue this.destinationAiWorkflowArn para poner las metricas en el cloudwatch
+    this.destinationAiWorkflowArn = new CfnOutput(
+      this,
+      "CFOutputDestinationAiWorkflowArn",
+      {
+        value: workflow.stateMachineArn,
+      },
+    );
+    //agregue this.confirmDestinationWorkflowArn para poner las metricas en el cloudwatch
     this.confirmDestinationWorkflowArn = new CfnOutput(
       this,
       "CfnOutputConfirmDestinationMachineArn",
@@ -324,11 +329,12 @@ export class DestinationAiStack extends Stack {
       },
     );
 
+    // URL del endpoint que dispara la Máquina 1 (autocomplete, sync)
     new CfnOutput(this, "DestinationAiApiUrl", { value: api.url });
 
-    // Agregamos un output de Cloudformation para poder ver el arn de la funcion y ver el nombre de la funcion.
-    new CfnOutput(this, "CFOutputStepFunctionArn", {
-      value: workflow.stateMachineArn,
+    // URL del endpoint que dispara la Máquina 2 (confirm, fire-and-forget)
+    new CfnOutput(this, "ConfirmDestinationApiUrl", {
+      value: `${api.url}confirm`,
     });
   }
 }
