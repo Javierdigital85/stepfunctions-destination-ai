@@ -1,0 +1,78 @@
+{
+  "Comment": "A description of my state machine",
+  "StartAt": "S3 Get prompt for Bedrock",
+  "States": {
+    "S3 Get prompt for Bedrock": {
+      "Type": "Task",
+      "Arguments": {
+        "Bucket": "${DataBucketName}",
+        "Key": "prompts/bedrock-new-destination-prompt.txt"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Next": "Bedrock Generates news with Bedrock",
+      "Assign": {
+        "newsPrompt": "{% $states.result.Body %}",
+        "destination": "{% $states.input.destination %}"
+      }
+    },
+    "Bedrock Generates news with Bedrock": {
+      "Type": "Task",
+      "Arguments": {
+        "ModelId": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "ContentType": "application/json",
+        "Body": {
+          "anthropic_version": "bedrock-2023-05-31",
+          "max_tokens": 300,
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{% $newsPrompt & $destination %}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "Resource": "arn:aws:states:::bedrock:invokeModel",
+      "Next": "SNS Send email",
+      "Assign": {
+        "newsText": "{% $states.result.Body.content[0].text %}"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "BackoffRate": 2,
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "Success"
+        }
+      ]
+    },
+    "SNS Send email": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Arguments": {
+        "TopicArn": "${SNSTopicArn}",
+        "Message": "{% $newsText %}",
+        "Subject": "New destination available at Travel World"
+      },
+      "End": true
+    },
+    "Success": {
+      "Type": "Succeed"
+    }
+  },
+  "QueryLanguage": "JSONata"
+}

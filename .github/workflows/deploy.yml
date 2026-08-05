@@ -1,0 +1,38 @@
+name: Deployment
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@main
+        with:
+          aws-region: sa-east-1
+          role-to-assume: arn:aws:iam::319044448252:role/rol-github
+          role-session-name: deployment-session
+
+      - name: cdk deploy
+        run: npx --yes cdk deploy --all --require-approval never
+        env:
+          DESTINATION_NOTIFICATION_EMAIL: ${{ secrets.DESTINATION_NOTIFICATION_EMAIL }}

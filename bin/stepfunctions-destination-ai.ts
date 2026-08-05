@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-import * as cdk from 'aws-cdk-lib/core';
-import { StepfunctionsDestinationAiStack } from '../lib/stepfunctions-destination-ai-stack';
+import * as cdk from "aws-cdk-lib/core";
+import { DestinationAiStack } from "../lib/destination-ai-stack";
+import "dotenv/config";
 
 const app = new cdk.App();
-new StepfunctionsDestinationAiStack(app, 'StepfunctionsDestinationAiStack', {
+new DestinationAiStack(app, "DemoStepfunctionsDestinationAiStack", {
+  destinationEmailNotification: process.env.DESTINATION_NOTIFICATION_EMAIL,
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */

@@ -1,0 +1,7 @@
+You are the communications manager for a travel agency called Travel World.
+We have just added a new destination to our catalog.
+Write a short and engaging email (maximum 150 words) to announce this new destination to our customers.
+Use a warm and enthusiastic tone, highlight why it is worth visiting, and encourage customers to book their trip.
+Return only the email body, without a subject line or signature.
+Do not use Markdown formatting (no headers, no bold, no asterisks). Return plain text only.
+The destination is :
