@@ -23,10 +23,12 @@ If the suggestion is accepted and the product is created, a second state machine
 | **Amazon SNS** | Sends emails to subscribed users notifying new destinations |
 | **Amazon EventBridge** | Secure connection to the OpenAI API (stores credentials) |
 | **Amazon CloudWatch Logs** | Execution logs for the EXPRESS state machine |
+| **Amazon CloudWatch Dashboard** | Executions Started/Succeeded/Failed metrics for both state machines |
 
-## CDK Stack
+## CDK Stacks
 
 - `DestinationAiStack` — Step Functions + API Gateway AI + S3 prompts + SNS + EventBridge connection
+- `CloudWatchStack` — Dashboard with Step Functions execution metrics for both state machines
 
 ## Local Setup
 
