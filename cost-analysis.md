@@ -58,7 +58,7 @@ No hay Lambda, DynamoDB, ECS ni ningún otro servicio en el flujo de ejecución.
 | SFN Express Request | $0.000001 / request | AWS Pricing API — `SAE1-StepFunctions-Request` |
 | SFN Express Duration | $0.00001667 / GB-s | AWS Pricing API — `SAE1-StepFunctions-GB-Second` |
 | S3 GET request | $0.00000056 / request | AWS Pricing API — `SAE1-Requests-Tier2` |
-| CloudWatch Logs ingestión | ~$0.76/GB | Estimado (us-east-1 $0.50/GB × factor regional ~1.5x) |
+| CloudWatch Logs ingestión | $0.90/GB | AWS Pricing API — `SAE1-VendedLog-Bytes` (Standard, primeros 10TB) |
 | OpenAI gpt-5.6-luna input | $0.20 / 1M tokens | Página oficial OpenAI |
 | OpenAI gpt-5.6-luna output | $1.20 / 1M tokens | Página oficial OpenAI |
 
@@ -78,7 +78,7 @@ S3 GetObject:
   1 × $0.00000056 = $0.0000006
 
 CloudWatch Logs (LogLevel.ALL + includeExecutionData=true):
-  ~5 KB / 1,048,576 × $0.76 = $0.0000036
+  ~5 KB / 1,048,576 × $0.90 = $0.0000043
 
 OpenAI gpt-5.6-luna:
   Input:  465 / 1,000,000 × $0.20  = $0.0000930
@@ -86,8 +86,8 @@ OpenAI gpt-5.6-luna:
   Subtotal OpenAI = $0.0005130
 
 ─────────────────────────────────────────────
-TOTAL AWS M1:   $0.0000010 + $0.0000104 + $0.0000006 + $0.0000036 = $0.0000156
-TOTAL M1:       $0.0000156 + $0.0005130 = $0.0005286 ≈ $0.000529
+TOTAL AWS M1:   $0.0000010 + $0.0000104 + $0.0000006 + $0.0000043 = $0.0000163
+TOTAL M1:       $0.0000163 + $0.0005130 = $0.0005293 ≈ $0.000529
 ─────────────────────────────────────────────
 ```
 
@@ -99,11 +99,11 @@ TOTAL M1:       $0.0000156 + $0.0005130 = $0.0005286 ≈ $0.000529
 SFN Request:       1 × $0.000001              = $0.0000010
 SFN Duration:      3.75 GB-s × $0.00001667   = $0.0000625
 S3 (3 intentos):   3 × $0.00000056           = $0.0000017
-CW Logs (~30 KB):  30 / 1,048,576 × $0.76   = $0.0000218
+CW Logs (~30 KB):  30 / 1,048,576 × $0.90   = $0.0000258
 OpenAI (3 intentos): 3 × $0.0005130          = $0.0015390
 
 ─────────────────────────────────────────────
-TOTAL M1 peor caso: $0.0016260 ≈ $0.00163
+TOTAL M1 peor caso: $0.0016300 ≈ $0.00163
 ─────────────────────────────────────────────
 ```
 
@@ -249,8 +249,8 @@ El costo fijo mensual ($3.40) supera el costo variable de 10 ciclos completos ($
 |---|---|---|
 | OpenAI gpt-5.6-luna | ~$0.1026 | ~62% |
 | Bedrock Claude Haiku 4.5 | ~$0.0545 | ~33% |
-| Step Functions | ~$0.0042 | ~2.5% |
-| S3 + CW Logs | ~$0.0046 | ~2.5% |
+| Step Functions | ~$0.0079 | ~4.8% |
+| S3 + CW Logs | ~$0.0010 | ~0.6% |
 
 ---
 
@@ -284,7 +284,7 @@ El costo fijo mensual ($3.40) supera el costo variable de 10 ciclos completos ($
 | Tokens output Bedrock | ~200 | `max_tokens: 300` en `confirm-destination.asl.json`; email ~150 palabras |
 | Precio OpenAI gpt-5.6-luna | $0.20/$1.20 por 1M in/out | Página oficial OpenAI |
 | Precio Bedrock Claude Haiku 4.5 | $1.00/$5.00 por 1M in/out | AWS Bedrock pricing — Global Cross-region, sa-east-1 |
-| Precio CW Logs sa-east-1 | ~$0.76/GB | Estimado (us-east-1 $0.50/GB × factor regional ~1.5x) |
+| Precio CW Logs sa-east-1 | $0.90/GB | AWS Pricing API — `SAE1-VendedLog-Bytes` (Standard) |
 | Transiciones M2 caso feliz | 3 | Contadas en `confirm-destination.asl.json` |
 | Transiciones M2 peor caso | 3 | Reintentos dentro de un Task no generan transiciones adicionales en STANDARD |
 | N rechazos promedio | 3 | Supuesto del analista; el código no define límite |

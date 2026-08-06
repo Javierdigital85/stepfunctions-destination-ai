@@ -25,6 +25,13 @@ If the suggestion is accepted and the product is created, a second state machine
 | **Amazon CloudWatch Logs** | Execution logs for the EXPRESS state machine |
 | **Amazon CloudWatch Dashboard** | Executions Started/Succeeded/Failed metrics for both state machines |
 
+### Why Step Functions for orchestration?
+
+The AI flow is a sequence of steps (read prompt → call OpenAI/Bedrock → notify) that needs retries and error handling between each call. Step Functions expresses that declaratively (`Retry`/`Catch` blocks in the ASL) using direct SDK integrations (`s3:getObject`, `bedrock:invokeModel`, `sns:publish`), so **no Lambda is needed just to glue these calls together** — less code to maintain, and each step is visible in the console for debugging.
+
+- **Machine 1 (autocomplete) is EXPRESS** because the frontend needs a synchronous response in the same request (it opens the review modal with the AI suggestion, and must respond within 29s).
+- **Machine 2 (confirm) is STANDARD and fire-and-forget** because the admin doesn't need to wait for the email to be generated and sent — the API responds 200 immediately after starting the execution.
+
 ## CDK Stacks
 
 - `DestinationAiStack` — Step Functions + API Gateway AI + S3 prompts + SNS + EventBridge connection
@@ -47,9 +54,23 @@ npx cdk synth
 
 ## Deploy to AWS
 
+### Manual deploy
+
 ```bash
-npm run build && npx cdk deploy
+npm run build && npx cdk deploy --all
 ```
+
+### CI/CD with GitHub Actions
+
+Every push to `main` triggers an automatic deploy via `.github/workflows/deploy.yml`.
+
+The workflow:
+1. Checks out the repo
+2. Installs dependencies (`npm ci`)
+3. Assumes an IAM role via OIDC (no long-lived credentials stored)
+4. Runs `cdk deploy --all --require-approval never`
+
+**Required GitHub secret:** `DESTINATION_NOTIFICATION_EMAIL`. The IAM role ARN is hardcoded in the workflow. Make sure the OIDC trust policy in AWS allows this GitHub repo.
 
 ## Testing without a frontend
 
@@ -207,4 +228,4 @@ aws secretsmanager create-secret --name openai-api-key --secret-string "sk-..."
 * `npx cdk diff`    compare deployed stack with current state
 * `npx cdk synth`   emits the synthesized CloudFormation template
 
-> This project is extracted from the full [Travel World infrastructure](https://github.com/) for demo purposes. It only includes the Step Functions related resources.
+> This project is extracted from the full Travel World infrastructure (private repo, still in progress) for demo purposes. It only includes the Step Functions related resources.
