@@ -29,7 +29,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@main
         with:
           aws-region: sa-east-1
-          role-to-assume: ${{secrets.AWS_ROLE_ARN}}
+          role-to-assume: arn:aws:iam::319044448252:role/rol-github
           role-session-name: deployment-session
 
       - name: cdk deploy
