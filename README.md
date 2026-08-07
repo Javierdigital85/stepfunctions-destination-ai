@@ -18,7 +18,7 @@ If the suggestion is accepted and the product is created, a second state machine
 |---|---|
 | **API Gateway (Destination AI)** | REST API that triggers the Step Functions for autocomplete and confirmation |
 | **AWS Step Functions** | Orchestrates the AI autocomplete workflow with OpenAI and the notification workflow with Bedrock + SNS |
-| **Amazon S3 (Prompts)** | Bucket `statemachine-ai-destination-data-bucket` storing prompts for the AI workflows |
+| **Amazon S3 (Prompts)** | Bucket `demo-statemachine-ai-destination-data-bucket` storing prompts for the AI workflows |
 | **Amazon Bedrock** | Model `anthropic.claude-haiku-4-5-20251001-v1:0` for generating promotional email content |
 | **Amazon SNS** | Sends emails to subscribed users notifying new destinations |
 | **Amazon EventBridge** | Secure connection to the OpenAI API (stores credentials) |
@@ -70,7 +70,7 @@ The workflow:
 3. Assumes an IAM role via OIDC (no long-lived credentials stored)
 4. Runs `cdk deploy --all --require-approval never`
 
-**Required GitHub secret:** `DESTINATION_NOTIFICATION_EMAIL`. The IAM role ARN is hardcoded in the workflow. Make sure the OIDC trust policy in AWS allows this GitHub repo.
+**Required GitHub secrets:** `DESTINATION_NOTIFICATION_EMAIL` and `AWS_ROLE_ARN` (the IAM role the workflow assumes via OIDC). Make sure the OIDC trust policy in AWS allows this GitHub repo.
 
 ## Testing without a frontend
 
@@ -203,17 +203,17 @@ aws secretsmanager create-secret --name openai-api-key --secret-string "sk-..."
 **Example of a successful autocomplete API response:**
 
 ```json
-{
+ {
   "destinationCountry": "Argentina",
-  "destinationProvinceOrState": "Córdoba",
+  "destinationProvinceOrState": "Córdoba Province",
   "destinationCity": "Córdoba",
-  "description": "Discover the vibrant city of Córdoba, known for its stunning colonial architecture and lively atmosphere. Explore historical sites, savor delicious local cuisine, and immerse yourself in the city's rich culture and traditions. With beautiful parks and a friendly vibe, Córdoba offers a perfect blend of history and modernity.",
-  "weather": ["Four Seasons"],
-  "nature": ["Mountains", "National Parks"],
-  "urbanExperience": ["Nightlife", "Gastronomy", "Art & Museums"],
-  "culture": ["History & Culture", "Local Traditions"],
-  "activities": ["Hiking", "Cycling"],
-  "wellness": ["Family Friendly", "Eco Tourism"]
+  "description": "Discover Córdoba, Argentina’s vibrant cultural heart, blending historic Jesuit heritage, lively nightlife, excellent gastronomy and easy access to the scenic Sierras. Enjoy charming mountain towns, rivers, waterfalls, outdoor adventures and warm local traditions in a destination made for exploration.",
+  "weather": ["Sunny Weather", "Four Seasons", "Dry Climate"],
+  "nature": ["Mountains", "Waterfalls", "National Parks", "Lakes"],
+  "urbanExperience": ["Nightlife", "Gastronomy", "Shopping", "Street Food", "Art & Museums", "Architecture", "Markets & Bazaars"],
+  "culture": ["History & Culture", "World Heritage Sites", "Religious Sites", "Festivals & Carnivals", "Local Traditions"],
+  "activities": ["Adventure Sports", "Hiking", "Cycling", "Fishing"],
+  "wellness": ["Family Friendly", "Romantic", "Luxury", "Eco Tourism", "Backpacker Friendly"]
 }
 ```
 
