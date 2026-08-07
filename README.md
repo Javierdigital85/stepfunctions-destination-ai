@@ -39,7 +39,7 @@ The AI flow is a sequence of steps (read prompt → call OpenAI/Bedrock → noti
 
 ## Local Setup
 
-**Prerequisites:** Node.js 20+, AWS CLI configured, AWS CDK installed globally.
+**Prerequisites:** Node.js 24+ (LTS), AWS CLI configured, AWS CDK installed globally.
 
 ```bash
 # Install dependencies
