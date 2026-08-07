@@ -228,4 +228,4 @@ aws secretsmanager create-secret --name openai-api-key --secret-string "sk-..."
 * `npx cdk diff`    compare deployed stack with current state
 * `npx cdk synth`   emits the synthesized CloudFormation template
 
-> This project is extracted from the full Travel World infrastructure (private repo, still in progress) for demo purposes. It only includes the Step Functions related resources javi.
+> This project is extracted from the full Travel World infrastructure (private repo, still in progress) for demo purposes. It only includes the Step Functions related resources.
